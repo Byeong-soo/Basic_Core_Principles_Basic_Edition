@@ -1,5 +1,6 @@
 package hello.demo.scope;
 
+import lombok.RequiredArgsConstructor;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -23,6 +24,34 @@ public class SingletonWithPrototypeTest1 {
         prototypeBean2.addCount();
         assertThat(prototypeBean2.getCount()).isEqualTo(1);
     }
+
+    @Test
+    void singletonClientUsePrototype() {
+        AnnotationConfigApplicationContext ac =
+                new AnnotationConfigApplicationContext(ClientBean.class, PrototypeBean.class);
+
+        ClientBean clientBean1 = ac.getBean(ClientBean.class);
+        int count1 = clientBean1.logic();
+        assertThat(count1).isEqualTo(1);
+
+        ClientBean clientBean2 = ac.getBean(ClientBean.class);
+        int count2 = clientBean2.logic();
+        assertThat(count2).isEqualTo(2);
+    }
+
+    @Scope("singleton")
+    @RequiredArgsConstructor
+    static class ClientBean{
+        private final PrototypeBean prototypeBean;
+
+
+        public int logic() {
+            prototypeBean.addCount();
+            return prototypeBean.getCount();
+        }
+    }
+
+
 
     @Scope("prototype")
     static class PrototypeBean{
